@@ -1,7 +1,7 @@
 from uuid import uuid4
-from chat import MsgChat
-from options import OptionSingleton
 from time import time
+from debate.chat import MsgChat
+from debate.options import options
 from debate._helper import LOGGER
 
 class Room:
@@ -11,7 +11,6 @@ class Room:
     participants = set()
     players = set()
     chat = MsgChat()
-    options = OptionSingleton
     subject_keyword = ""
     timestamp = time()  # EPOCH time since midnight 1970
     LEFT_SIDE = None
@@ -28,7 +27,7 @@ class Room:
     def is_game_ready_to_start(self):
         '''Return True if game is ready to start''' 
         players_ready = self.RIGHT_SIDE and self.LEFT_SIDE  # True if we have two players
-        have_audience = len(self.participants) > self.options.AUDIENCE_MIN # True if we have the requested amount of audience
+        have_audience = len(self.participants) > options.AUDIENCE_MIN # True if we have the requested amount of audience
         
         return players_ready and have_audience
 
@@ -50,8 +49,8 @@ class Room:
 
     def espectator_in(self, espectator):
         '''Add one participant to game room espectator'''
-        if self.options.AUDIENCE_MAX
-        self.participants.add(espectator)
+        if options.AUDIENCE_MAX:
+            self.participants.add(espectator)
 
     def espectator_out(self, espectator):
         '''Remove an participant from the game room espectator'''

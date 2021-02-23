@@ -1,7 +1,7 @@
 class MsgChat:
     '''Text Message Chat'''
 
-    def broadcast(self):
+    def broadcast(self, msg):
         '''Broadcast message to participants'''
         pass
 

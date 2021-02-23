@@ -24,3 +24,5 @@ class OptionSingleton:
     def get_config_from_file(self, file="config.ini"):
         '''Load configuration from INI file'''
         pass
+
+options = OptionSingleton()
