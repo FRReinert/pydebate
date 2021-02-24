@@ -1,13 +1,11 @@
-from debate.options import OptionSingleton
 from debate.participants import Participant
-from debate._helper import async_function, LOGGER, check_carriage_return
+from debate._helper import async_function, LOGGER, socket_command
 import socket
 
 
 class Server:
     '''Matchmaking class'''
     
-    options = OptionSingleton
     room_list = set()
     participants = set()
 
@@ -29,19 +27,21 @@ class Server:
         while True:
             try:
                 data = connection.recv(buffer)
+
+                # Close connection if client hard quit
                 if not data:    
                     LOGGER.info(f'Hard Disconected: {str(address[0])} : {str(address[1])}')
                     connection.close()
                     break
-                elif data == b'\x11':
-                    LOGGER.info(f'Gracefully Disconected: {str(address[0])} : {str(address[1])}')
-                    connection.close()
-                    break
+
+                # TODO: implement command receiver
                 else:
-                    print(data)
+                    self.handle_command(command=data, connection=connection)
+
             except Exception as e:
                 LOGGER.error(f'ERR: Error handling connection: {str(e)}')
                 break
+
         return None
 
     def main_loop(self):
@@ -50,14 +50,45 @@ class Server:
             client, addr = self.server.accept()
             self.handle_connection(client, addr)
 
-
-    def new_participand(self, participant):
+    @socket_command
+    def new_participand(self, command, connection):
         '''Add new participant to server'''
-        self.participants.add(participant)
+        try:
+            name = command.decode().split('JOIN')[1]
+        except:
+            connection.sendall('Need a valid name')
+            return
 
-    def remove_participant(self, participant):
+        p = Participant(name=name, connection=connection)
+        self.participants.add(p)
+
+    @socket_command
+    def remove_participant(self, command, connection):
         '''Remove a participant from server'''
         try:
-            self.participants.remove(participant)
-        except:
-            LOGGER.error(f"Cant remove {participant} from matchmaking")
+            f = [x for x in self.participants if x.connection == connection]
+            if len(f) > 0:
+                self.participants.remove(f[0])
+                connection.close()
+
+        except Exception as e:
+            LOGGER.error(f"ERR: Cant remove client: {str(e)}")
+
+    def handle_command(self, *args, **kwargs):
+        '''Handle commands received over socket'''
+        
+        # No command handler
+        if not kwargs['command']:
+            return
+        
+        # ^Q handler
+        elif kwargs['command'] == b'\x11':
+            self.remove_participant(*args, **kwargs)
+        
+        elif b'JOIN' in kwargs['command']:
+            self.new_participand(*args, **kwargs)
+
+        # Unrecognized command
+        else:
+            print(kwargs['command'])
+

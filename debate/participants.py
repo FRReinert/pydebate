@@ -6,17 +6,9 @@ class Participant:
     '''Base Participant Class'''
     is_player = False
     is_audience = False
+    in_matchmaking = True
 
-    def __init__(self, name):
+    def __init__(self, name, connection):
         self.uid = uuid4()
         self.name = name
-
-
-class Player(Participant):
-    '''Player Class'''
-    is_player = True 
-
-
-class Audience(Participant):
-    '''Audience Class'''
-    is_audience = True
+        self.connection = connection  # Receive a Socket object
