@@ -1,6 +1,5 @@
 from uuid import uuid4
 from time import time
-from debate.chat import MsgChat
 from debate.options import options
 from debate._helper import LOGGER
 
@@ -11,7 +10,6 @@ class Room:
     uid = uuid4()
     participants = set()
     players = set()
-    chat = MsgChat()
     subject_keyword = ""
     timestamp = time()  # EPOCH time since midnight 1970
     LEFT_SIDE = None
@@ -57,7 +55,7 @@ class Room:
         '''Remove an participant from the game room espectator'''
         try:
             self.participants.remove(espectator)
-            self.chat.broadcast(f"Espectator {espectator} left the room.")
+            # TODO: Send broadcast
         except:
             LOGGER.error(f"ERR: Can't remove {espectator} from room {self.uid}")
 

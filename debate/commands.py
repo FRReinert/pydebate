@@ -6,10 +6,16 @@ class CommandMiddleware:
     '''Middleware Common Command Class'''
 
     def __init__(self):
-        self.participants = set() # Dummy declaration to stop acusing self.participant of undefined
+        self.participants = set()
         self.command_dict = {
-            '/join': self.new_participant,
-            '/quit': self.remove_participant
+            '/help': self.list_commands,
+            '/connect': self.new_participant,
+            '/quit': self.remove_participant,
+            '/broadcast': self.broadcast_msg,
+            '/msg': self.send_msg, 
+            '/nick': self.change_nickname,
+            '/list': self.list_rooms,
+            '/join':self.join_room
         }
 
     def command_handler(self, *args, **kwargs):
@@ -32,7 +38,7 @@ class CommandMiddleware:
 
     @socket_command
     def new_participant(self, *args, **kwargs):
-        '''Add new participant to server'''
+        '''Join Server: /connect'''
 
         # Verify if its already connected
         f = [x for x in self.participants if x.connection == kwargs['connection']]
@@ -50,7 +56,7 @@ class CommandMiddleware:
 
     @socket_command
     def remove_participant(self, *args, **kwargs):
-        '''Remove a participant from server'''
+        '''Quit Server: /quit'''
         try:
             f = [x for x in self.participants if x.connection == kwargs['connection']]
             if len(f) > 0:
@@ -59,3 +65,37 @@ class CommandMiddleware:
 
         except Exception as e:
             LOGGER.error(f"ERR: Can't remove client: {str(e)}")
+
+    @socket_command
+    def list_commands(self, *args, **kwargs):
+        '''List commands: /help'''
+        result = []
+        for key, value in self.command_dict.items():
+            result.append((key, value.__doc__))
+
+        kwargs['connection'].sendall(str(result).decode())
+
+    @socket_command
+    def broadcast_msg(self, *args, **kwargs):
+        '''Brodcast message: /broadcast <Message>'''
+        pass
+
+    @socket_command
+    def change_nickname(self, *args, **kwargs):
+        '''Brodcast message: /nick <Message>'''
+        pass
+
+    @socket_command
+    def list_rooms(self, *args, **kwargs):
+        '''List Rooms: /list'''
+        pass
+
+    @socket_command
+    def join_room(self, *args, **kwargs):
+        '''Join room: /join <room_uuid>'''
+        pass
+
+    @socket_command
+    def send_msg(self, *args, **kwargs):
+        '''Send message: /msg <-r Room> <-p Participant>'''
+        pass
