@@ -1,3 +1,4 @@
+from debate.exceptions import ArgumentNotFound
 from debate._helper import LOGGER, socket_command
 from debate.participants import Participant
 
@@ -22,29 +23,34 @@ class CommandMiddleware:
         '''Handle commands received over socket'''
         
         command = kwargs['command'].decode("utf8", "ignore").split()
+        conn = kwargs['connection']
        
         # Verify command health
         if len(command) < 1 or not command[0].startswith('/'):
-            kwargs['connection'].sendall(f'>> This is not a command: {command[0]}\r\n'.encode())
+            conn.sendall(f'>> This is not a command: {command[0]}\r\n'.encode())
             return
 
         # Execute command
         try:
             func = self.command_dict[command[0]]
             args = command[1:]
-            func(*args, connection=kwargs['connection'])
-        except:
-            kwargs['connection'].sendall(f'>> Invalid command: {command}\r\n'.encode())
+            func(*args, connection=conn)
+        except Exception as e:
+            conn.sendall(f'>> Command error: {str(e)}\r\n'.encode())
 
     @socket_command
     def new_participant(self, *args, **kwargs):
-        '''Join Server: /connect'''
+        '''Connect to Server: /connect <Name>'''
 
         # Verify if its already connected
         f = [x for x in self.participants if x.connection == kwargs['connection']]
         if len(f) > 0:
             kwargs['connection'].sendall(b'>> Already connected\r\n')
             return
+
+        # Verify if argument were filled
+        if len(args) < 1:
+            raise ArgumentNotFound('Name')
         
         # Add participant to the list 
         try:

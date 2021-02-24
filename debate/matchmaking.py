@@ -1,5 +1,7 @@
 from debate._helper import async_function, LOGGER
 from debate.commands import CommandMiddleware
+from debate.options import options
+from ssl import wrap_socket, PROTOCOL_TLSv1_2
 import socket
 
 
@@ -11,7 +13,9 @@ class Server(CommandMiddleware):
         self.host_desc = desc
         self.host_ip = ip
         self.host_port = port
-        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
+        sk = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server = wrap_socket(sk, ssl_version=PROTOCOL_TLSv1_2, certfile=options.CERTFILE, keyfile=options.KEYFILE)
         self.server.bind((self.host_ip, self.host_port))
         self.server.listen()
         LOGGER.info(f">>INF: Server listening")

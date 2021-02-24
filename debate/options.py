@@ -15,6 +15,8 @@ class OptionSingleton:
     '''Room Options'''
 
     OPTIONS_LOADED = False
+    CERTFILE = 'certfile.pem'
+    KEYFILE = 'certfile.key'
     AUDIENCE_MIN = 0  # Min amount of participants per room
     AUDIENCE_MAX = 0  # Max amount of participants per room
     AUDIENCE_PERCENT_SCORE = 0.0  # Percentile of score count audience can reach
