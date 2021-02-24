@@ -25,18 +25,24 @@ class Server:
     def handle_connection(self, connection, address):
         '''Handle new participant connection'''
         buffer = 1024
-        connection.send(f"You're connected to server {self.host_title}".encode())
+        connection.sendall(f"You're connected to server {self.host_title}".encode())
         while True:
             try:
-                data = connection.recv(buffer).decode("utf-8", "ignore")
-                if 'Q^' in data:    
-                    LOGGER.error(f'Received request to exit from: {str(address[0])} : {str(address[1])}')
+                data = connection.recv(buffer)
+                if not data:    
+                    LOGGER.info(f'Hard Disconected: {str(address[0])} : {str(address[1])}')
+                    connection.close()
                     break
-                elif data or check_carriage_return(data):
-                    connection.sendall(f'ECHO: {data}'.encode())
+                elif data == b'\x11':
+                    LOGGER.info(f'Gracefully Disconected: {str(address[0])} : {str(address[1])}')
+                    connection.close()
+                    break
+                else:
+                    print(data)
             except Exception as e:
                 LOGGER.error(f'ERR: Error handling connection: {str(e)}')
                 break
+        return None
 
     def main_loop(self):
         '''Main server loop. Listen for new connections'''

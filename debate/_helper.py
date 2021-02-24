@@ -6,7 +6,7 @@ def async_function(function):
 
     def wrapper(*args, **kwargs):
         thread = threading.Thread(target=function, args=args, kwargs=kwargs)
-        thread.daemon = True
+        # thread.daemon = True
         thread.start()
         return thread
     
