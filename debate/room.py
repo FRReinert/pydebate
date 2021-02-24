@@ -4,6 +4,7 @@ from debate.chat import MsgChat
 from debate.options import options
 from debate._helper import LOGGER
 
+
 class Room:
     '''Game Room'''
 

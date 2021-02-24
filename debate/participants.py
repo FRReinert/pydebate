@@ -12,3 +12,6 @@ class Participant:
         self.uid = uuid4()
         self.name = name
         self.connection = connection  # Receive a Socket object
+
+    def __str__(self):
+        return '<%s>' % self.name 
